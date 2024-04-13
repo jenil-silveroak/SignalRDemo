@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using SignalRDemo.Components;
 using SignalRDemo.Models.DbContextModel;
 using SignalRDemo.Services;
-using SignalRDemo.SignalRServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +35,5 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-
-app.MapHub<SongHub>("/");
 
 app.Run();
