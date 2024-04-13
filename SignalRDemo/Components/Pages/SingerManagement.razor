@@ -1,0 +1,99 @@
+﻿@page "/singers"
+@using SignalRDemo.Models
+@using SignalRDemo.Services
+@rendermode InteractiveServer
+@inject SingerService SingerService
+
+<h1>Singers</h1>
+
+<div class="row">
+    @foreach (var singer in Singers)
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@singer.Name</h5>
+                    <button @onclick="() => EditSinger(singer)" class="btn btn-primary">Edit</button>
+                    <button @onclick="() => DeleteSinger(singer.SingerId)" class="btn btn-danger">Delete</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<button @onclick="AddSinger" class="btn btn-success">Add Singer</button>
+
+@if (showAddEditModal)
+{
+    <div class="modal show" style="display: block; background: rgba(0, 0, 0, 0.5); position: fixed; top: 0; bottom: 0; left: 0; right: 0; z-index: 1050;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@modalTitle</h5>
+                    <button type="button" class="close btn" aria-label="Close" @onclick="() => CloseModal()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control" placeholder="Name" @bind="@singerForm.Name" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => CloseModal()">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveSinger">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Singer> Singers { get; set; }
+    private Singer singerForm = new Singer();
+    private bool showAddEditModal = false;
+    private string modalTitle = "";
+
+    protected override void OnInitialized()
+    {
+        Singers = SingerService.GetAllSingers();
+    }
+
+    private void AddSinger()
+    {
+        singerForm = new Singer();
+        modalTitle = "Add Singer";
+        showAddEditModal = true;
+    }
+
+    private void EditSinger(Singer singer)
+    {
+        singerForm = new Singer { SingerId = singer.SingerId, Name = singer.Name };
+        modalTitle = "Edit Singer";
+        showAddEditModal = true;
+    }
+
+    private void SaveSinger()
+    {
+        if (singerForm.SingerId == 0)
+        {
+            SingerService.CreateSinger(singerForm);
+        }
+        else
+        {
+            SingerService.UpdateSinger(singerForm);
+        }
+        Singers = SingerService.GetAllSingers();
+        CloseModal();
+    }
+
+    private void DeleteSinger(int singerId)
+    {
+        SingerService.DeleteSinger(singerId);
+        Singers = SingerService.GetAllSingers();
+    }
+
+    private void CloseModal()
+    {
+        showAddEditModal = false;
+        StateHasChanged();
+    }
+}
