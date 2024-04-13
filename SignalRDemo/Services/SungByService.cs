@@ -83,5 +83,26 @@ namespace SignalRDemo.Services
                 throw;
             }
         }
+
+        public void DeleteSungBySongId(int id)
+        {
+            try
+            {
+                var sungBy = _context.SungBys.Where(x=>x.SongId == id).ToList();
+                if(sungBy.Count != 0)
+                {
+                    foreach(var item in sungBy)
+                    {
+                        _context.SungBys.Remove(item);
+                        _context.SaveChanges();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in DeleteSungBy: {ex.Message}");
+                throw;
+            }
+        }
     }
 }

@@ -1,15 +1,20 @@
-﻿using SignalRDemo.Models;
+﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using SignalRDemo.Models;
 using SignalRDemo.Models.DbContextModel;
+using SignalRDemo.SignalRServices;
 
 namespace SignalRDemo.Services
 {
     public class SongService
     {
         private readonly SongManagementDbContext _context;
+        private readonly IHubContext<SongHub> _hubContext;
 
-        public SongService(SongManagementDbContext context)
+        public SongService(SongManagementDbContext context, IHubContext<SongHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         public List<Song> GetAllSongs()
@@ -44,6 +49,8 @@ namespace SignalRDemo.Services
             {
                 _context.Songs.Add(song);
                 _context.SaveChanges();
+
+                _hubContext.Clients.All.SendAsync("UpdateSong", song);
             }
             catch (Exception ex)
             {
@@ -58,6 +65,8 @@ namespace SignalRDemo.Services
             {
                 _context.Songs.Update(song);
                 _context.SaveChanges();
+
+                _hubContext.Clients.All.SendAsync("UpdateSong", song);
             }
             catch (Exception ex)
             {
@@ -75,6 +84,8 @@ namespace SignalRDemo.Services
                 {
                     _context.Songs.Remove(song);
                     _context.SaveChanges();
+
+                    _hubContext.Clients.All.SendAsync("DeleteSong", id);
                 }
             }
             catch (Exception ex)
